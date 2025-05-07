@@ -26,7 +26,7 @@ def extract_numeric_power(x):
 df["clean_power"] = df["power_ps"].apply(extract_numeric_power)
 
 st.set_page_config(layout="centered")
-st.image("can_white.png", use_column_width=False, width=250)
+st.image("can_white.png", use_container_width=True, width=150)
 
 st.title("🚗 Car Price Estimator - Can Auto")
 
@@ -78,15 +78,15 @@ km = st.number_input("Mileage (km)", min_value=0, max_value=500000, value=100000
 colors = df["color"].dropna().unique()
 color = st.selectbox("Color", sorted(colors))
 
-# Feature engineering\scar_age = 2025 - year
-km_per_year = km / (car_age + 1)
-is_low_mileage = 1 if km < 50000 else 0
-is_new_car = 1 if car_age <= 2 else 0
-
 # Load the trained model
 model = joblib.load("final_rf_model.joblib")
 
 if st.button("Estimate Price"):
+    car_age = 2025 - year
+    km_per_year = km / (car_age + 1)
+    is_low_mileage = 1 if km < 50000 else 0
+    is_new_car = 1 if car_age <= 2 else 0
+
     input_df = pd.DataFrame([{
         "brand": selected_brand,
         "model": selected_model,
@@ -107,7 +107,7 @@ if st.button("Estimate Price"):
     if option == "Market Value":
         # Display estimated price and visual chart
         if os.path.exists("cycle.png"):
-            st.image("cycle.png", use_column_width=True)
+            st.image("cycle.png", use_container_width=True)
         st.markdown(f"""
         <div style='text-align: center; font-size: 18px; margin-top: 20px;'>
             🟢 <b>Easy Sale:</b> €{predicted_price*0.90:,.0f} &nbsp;&nbsp;&nbsp; 
@@ -117,5 +117,5 @@ if st.button("Estimate Price"):
         """, unsafe_allow_html=True)
 
     else:
-        st.image("CAR.png", width=250)
+        st.image("CAR.png", width=200)
         st.markdown(f"### 🚘 CAN Auto offers you: **€{predicted_price*0.85:,.2f}**")
