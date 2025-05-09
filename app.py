@@ -28,7 +28,7 @@ df["clean_power"] = df["power_ps"].apply(extract_numeric_power)
 st.set_page_config(layout="centered")
 st.image("can_white.png", use_container_width=True, width=150)
 
-st.title("🚗 Car Price Estimator - Can Auto")
+st.title("Car Price Estimator - Can Auto")
 
 st.markdown("""
 This app provides two pricing modes:
