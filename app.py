@@ -69,7 +69,7 @@ else:
     power = st.number_input("Power (PS)", min_value=1, max_value=1000, value=100)
 
 # Year and mileage with hint text
-year = st.number_input("Year of Manufacture (e.g., 2018)", min_value=1980, max_value=2025, value=2018)
+year = st.number_input("Year of Manufacture (e.g., 2018)", min_value=1980, max_value=2023, value=2018)
 km = st.number_input("Mileage (km) - Please enter your mileage", min_value=0, max_value=500000, value=100000)
 
 # Color
