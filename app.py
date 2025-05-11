@@ -110,7 +110,7 @@ if st.button("Estimate Price"):
 
         predicted_price = model.predict(input_df)[0]
 
-         if option == "Market Value":
+        if option == "Market Value":
             min_price = predicted_price
             max_price = predicted_price * 1.10
             if os.path.exists("cycle.png"):
