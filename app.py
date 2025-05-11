@@ -28,7 +28,7 @@ df["clean_power"] = df["power_ps"].apply(extract_numeric_power)
 col1, col2 = st.columns([1, 3])
 
 with col1:
-    st.image("can_white.png", width=150)  # daha küçük tut
+    st.image("can_white.png", width=200)  # daha küçük tut
 
 with col2:
     st.markdown("<h1 style='text-align: center;'>Car Price Estimator - Can Auto</h1>", unsafe_allow_html=True)
