@@ -25,7 +25,7 @@ def extract_numeric_power(x):
 
 df["clean_power"] = df["power_ps"].apply(extract_numeric_power)
 
-st.set_page_config(layout="centered")
+#st.set_page_config(layout="centered")
 st.image("can_white.png", use_container_width=True, width=150)
 
 st.title("Car Price Estimator - Can Auto")
