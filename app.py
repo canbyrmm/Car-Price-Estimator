@@ -110,9 +110,11 @@ if st.button("Estimate Price"):
 
         predicted_price = model.predict(input_df)[0]
 
-        if option == "Market Value":
+         if option == "Market Value":
             min_price = predicted_price
             max_price = predicted_price * 1.10
+            if os.path.exists("cycle.png"):
+                st.image("cycle.png", use_container_width=True)
             st.markdown(f"""
             <div style='text-align: center; font-size: 18px; margin-top: 20px;'>
                 💰 <b>Estimated price range:</b> €{min_price:,.0f} - €{max_price:,.0f}<br>
