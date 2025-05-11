@@ -25,10 +25,14 @@ def extract_numeric_power(x):
 
 df["clean_power"] = df["power_ps"].apply(extract_numeric_power)
 
-#st.set_page_config(layout="centered")
-st.image("can_white.png", width=150)
+col1, col2 = st.columns([1, 3])
 
-st.title("Car Price Estimator - Can Auto")
+with col1:
+    st.image("can_white.png", width=150)  # daha küçük tut
+
+with col2:
+    st.markdown("<h1 style='text-align: center;'>Car Price Estimator - Can Auto</h1>", unsafe_allow_html=True)
+
 
 st.markdown("""
 This app provides two pricing modes:
