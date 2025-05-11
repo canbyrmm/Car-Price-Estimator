@@ -41,86 +41,82 @@ This app provides two pricing modes:
 
 option = st.radio("Select Prediction Type:", ("Market Value", "Can Auto Offer"))
 
-# Brand
+# Inputs
 all_brands = sorted(df["brand"].dropna().unique())
 selected_brand = st.selectbox("Brand", ["Select a brand"] + all_brands)
-if selected_brand == "Select a brand":
-    st.stop()
 
-# Model
-filtered_models = df[df["brand"] == selected_brand]["model"].dropna().unique()
+filtered_models = df[df["brand"] == selected_brand]["model"].dropna().unique() if selected_brand != "Select a brand" else []
 selected_model = st.selectbox("Model", ["Select a model"] + sorted(filtered_models))
-if selected_model == "Select a model":
-    st.stop()
 
-# Fuel Type
 fuel_options = df[(df["brand"] == selected_brand) & (df["model"] == selected_model)]["fuel_type"].dropna().unique()
 valid_fuels = [f for f in fuel_options if f.lower() in ["diesel", "petrol", "electric", "hybrid", "other", "unknown"]]
 if not valid_fuels:
     valid_fuels = ["Petrol", "Diesel", "Electric", "Hybrid", "Other"]
 fuel = st.selectbox("Fuel Type", ["Select a fuel type"] + sorted(valid_fuels))
-if fuel == "Select a fuel type":
-    st.stop()
 
-# Transmission Type
 gear_options = df[(df["brand"] == selected_brand) & (df["model"] == selected_model)]["transmission_type"].dropna().unique()
 valid_gears = [g for g in gear_options if g.lower() in ["manual", "automatic", "semi-automatic"]]
 if not valid_gears:
     valid_gears = ["Manual", "Automatic", "Semi-automatic"]
 gear = st.selectbox("Transmission Type", ["Select a transmission type"] + sorted(valid_gears))
-if gear == "Select a transmission type":
-    st.stop()
 
-# Power (PS)
+# Power (PS) suggestion with manual override
 power_vals = df[(df["brand"] == selected_brand) & (df["model"] == selected_model)]["clean_power"].dropna()
 def_power = int(power_vals.median()) if not power_vals.empty else 100
-power = st.number_input("Power (PS)", min_value=1, max_value=1000, value=def_power)
+power = st.number_input("Power (PS) (suggested: median value shown)", min_value=1, max_value=1000, value=def_power)
 
-# Year and mileage
-year = st.number_input("Year of Manufacture", min_value=1980, max_value=2023, value=2018)
-km = st.number_input("Mileage (km)", min_value=0, max_value=500000, value=100000)
+# Year and mileage with hint text
+year = st.number_input("Year of Manufacture (e.g., 2018)", min_value=1980, max_value=2023, value=2018)
+km = st.number_input("Mileage (km) - Please enter your mileage", min_value=0, max_value=500000, value=100000)
 
 # Color
 color = st.selectbox("Color", ["Select a color"] + sorted(df["color"].dropna().unique()))
-if color == "Select a color":
-    st.stop()
 
 # Load model
 model = joblib.load("final_rf_model.joblib")
 
 if st.button("Estimate Price"):
-    car_age = 2025 - year
-    km_per_year = km / (car_age + 1)
-    is_low_mileage = 1 if km < 50000 else 0
-    is_new_car = 1 if car_age <= 2 else 0
-
-    input_df = pd.DataFrame([{
-        "brand": selected_brand,
-        "model": selected_model,
-        "fuel_type": fuel,
-        "transmission_type": gear,
-        "color": color,
-        "year": year,
-        "power_ps": power,
-        "mileage_in_km": km,
-        "car_age": car_age,
-        "km_per_year": km_per_year,
-        "is_low_mileage": is_low_mileage,
-        "is_new_car": is_new_car
-    }])
-
-    predicted_price = model.predict(input_df)[0]
-
-    if option == "Market Value":
-        if os.path.exists("cycle.png"):
-            st.image("cycle.png", use_container_width=True)
-        st.markdown(f"""
-        <div style='text-align: center; font-size: 18px; margin-top: 20px;'>
-            🟢 <b>Easy Sale:</b> €{predicted_price*0.90:,.0f} &nbsp;&nbsp;&nbsp; 
-            🟡 <b>Fair Market:</b> €{predicted_price:,.0f} &nbsp;&nbsp;&nbsp; 
-            🔴 <b>Hard to Sell:</b> €{predicted_price*1.10:,.0f}
-        </div>
-        """, unsafe_allow_html=True)
+    if (
+        selected_brand == "Select a brand" or
+        selected_model == "Select a model" or
+        fuel == "Select a fuel type" or
+        gear == "Select a transmission type" or
+        color == "Select a color"
+    ):
+        st.warning("Please fill in all selections before proceeding.")
     else:
-        st.image("CAR.png", width=200)
-        st.markdown(f"### 🚘 CAN Auto offers you: **€{predicted_price*0.85:,.2f}**")
+        car_age = 2025 - year
+        km_per_year = km / (car_age + 1)
+        is_low_mileage = 1 if km < 50000 else 0
+        is_new_car = 1 if car_age <= 2 else 0
+
+        input_df = pd.DataFrame([{
+            "brand": selected_brand,
+            "model": selected_model,
+            "fuel_type": fuel,
+            "transmission_type": gear,
+            "color": color,
+            "year": year,
+            "power_ps": power,
+            "mileage_in_km": km,
+            "car_age": car_age,
+            "km_per_year": km_per_year,
+            "is_low_mileage": is_low_mileage,
+            "is_new_car": is_new_car
+        }])
+
+        predicted_price = model.predict(input_df)[0]
+
+        if option == "Market Value":
+            min_price = predicted_price
+            max_price = predicted_price * 1.10
+            st.markdown(f"""
+            <div style='text-align: center; font-size: 18px; margin-top: 20px;'>
+                💰 <b>Estimated price range:</b> €{min_price:,.0f} - €{max_price:,.0f}<br>
+                Based on the selected vehicle's features.
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            dealer_price = predicted_price * 0.85
+            st.image("CAR.png", width=200)
+            st.markdown(f"### 🚘 CAN Auto offers you: **€{dealer_price:,.2f}**")
