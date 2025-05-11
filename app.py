@@ -60,10 +60,13 @@ if not valid_gears:
     valid_gears = ["Manual", "Automatic", "Semi-automatic"]
 gear = st.selectbox("Transmission Type", ["Select a transmission type"] + sorted(valid_gears))
 
-# Power (PS) suggestion with manual override
-power_vals = df[(df["brand"] == selected_brand) & (df["model"] == selected_model)]["clean_power"].dropna()
-def_power = int(power_vals.median()) if not power_vals.empty else 100
-power = st.number_input("Power (PS) (suggested: median value shown)", min_value=1, max_value=1000, value=def_power)
+# Power (PS) dropdown only from data
+power_values = df[(df["brand"] == selected_brand) & (df["model"] == selected_model)]["clean_power"].dropna().unique()
+power_values = sorted(list(set(power_values)))
+if power_values:
+    power = st.selectbox("Power (PS)", power_values)
+else:
+    power = st.number_input("Power (PS)", min_value=1, max_value=1000, value=100)
 
 # Year and mileage with hint text
 year = st.number_input("Year of Manufacture (e.g., 2018)", min_value=1980, max_value=2023, value=2018)
